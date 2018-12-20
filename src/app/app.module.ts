@@ -100,7 +100,7 @@ const formSetting: any = {
   bootstrap: [AppComponent],
   providers: [
     { provide: APP_BASE_HREF, useValue: '/' },
-    AuthGuard
+    AuthGuard,
   ],
 })
 export class AppModule {
