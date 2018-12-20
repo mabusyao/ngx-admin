@@ -4,6 +4,7 @@ import { NbMenuService, NbSidebarService } from '@nebular/theme';
 import { UserService } from '../../../@core/data/users.service';
 import { AnalyticsService } from '../../../@core/utils/analytics.service';
 import { LayoutService } from '../../../@core/data/layout.service';
+import { NbAuthJWTToken, NbAuthService } from '@nebular/auth';
 
 @Component({
   selector: 'ngx-header',
@@ -22,7 +23,15 @@ export class HeaderComponent implements OnInit {
               private menuService: NbMenuService,
               private userService: UserService,
               private analyticsService: AnalyticsService,
-              private layoutService: LayoutService) {
+              private layoutService: LayoutService,
+              private authService: NbAuthService) {
+
+      this.authService.onTokenChange()
+        .subscribe((token: NbAuthJWTToken) => {
+          if (token.isValid()) {
+            this.user = token.getPayload(); // here we receive a payload from the token and assigne it to our `user` variable
+          }
+      });
   }
 
   ngOnInit() {

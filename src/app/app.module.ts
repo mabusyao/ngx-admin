@@ -15,6 +15,18 @@ import { AppRoutingModule } from './app-routing.module';
 import { ThemeModule } from './@theme/theme.module';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 
+import { AuthGuard } from '../auth-guard.service';
+
+import { NbPasswordAuthStrategy, NbAuthModule, NbAuthJWTToken } from '@nebular/auth';
+import { NbSecurityModule } from '@nebular/security';
+
+const formSetting: any = {
+  redirectDelay: 0,
+  showMessages: {
+    success: true,
+  },
+};
+
 @NgModule({
   declarations: [AppComponent],
   imports: [
@@ -26,10 +38,69 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
     NgbModule.forRoot(),
     ThemeModule.forRoot(),
     CoreModule.forRoot(),
+    NbSecurityModule.forRoot({
+      accessControl: {
+        guest: {
+          view: ['news', 'comments'],
+        },
+        user: {
+          parent: 'guest',
+          create: 'comments',
+        },
+        moderator: {
+          parent: 'user',
+          create: 'news',
+          remove: '*',
+        },
+      },
+    }),
+    NbAuthModule.forRoot({
+      strategies: [
+        NbPasswordAuthStrategy.setup({
+          name: 'email',
+          token: {
+            class: NbAuthJWTToken,
+            key: 'token',
+          },
+
+          baseEndpoint: '/api',
+          login: {
+            endpoint: '/login',
+            method: 'post',
+          },
+          register: {
+            endpoint: '/auth/sign-up',
+            method: 'post',
+          },
+          logout: {
+            endpoint: '/auth/sign-out',
+            method: 'post',
+          },
+          requestPass: {
+            endpoint: '/auth/request-pass',
+            method: 'post',
+          },
+          resetPass: {
+            endpoint: '/auth/reset-pass',
+            method: 'post',
+          },
+        }),
+      ],
+      forms: {
+        login: formSetting,
+        register: formSetting,
+        requestPassword: formSetting,
+        resetPassword: formSetting,
+        logout: {
+          redirectDelay: 0,
+        },
+      },
+    }),
   ],
   bootstrap: [AppComponent],
   providers: [
     { provide: APP_BASE_HREF, useValue: '/' },
+    AuthGuard
   ],
 })
 export class AppModule {
